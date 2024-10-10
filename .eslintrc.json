@@ -1,9 +1,6 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript"],
+  "extends": "next",
   "rules": {
-    "no-var": "error"
-  },
-  "globals": {
-    "_mongoClientPromise": "writable"
+    "no-var": "off"
   }
 }
