@@ -60,12 +60,12 @@ export async function GET(request: Request) {
     const { db } = await connectToDatabase()
     console.log('Connected to database successfully')
 
-    const collection = db.collection('entries') // Use the correct collection name
+    const collection = db.collection('entries')
 
     console.log('Fetching entries...')
     const entries = await collection
       .find({})
-      .sort({ date: 1 }) // Change this line to sort in ascending order
+      .sort({ date: 1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .toArray()
