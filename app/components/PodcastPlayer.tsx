@@ -66,6 +66,9 @@ const PodcastPlayer: React.FC = () => {
           )}
         </div>
       </div>
+      <div className="mt-4 text-right">
+        <span className="text-xs text-gray-400">Powered by MattressAI</span>
+      </div>
     </div>
   );
 };
