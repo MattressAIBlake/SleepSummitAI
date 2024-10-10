@@ -59,7 +59,7 @@ const PodcastPlayer: React.FC = () => {
             <div>
               <h3 className="text-xl font-semibold mb-2">{currentPodcast.title}</h3>
               <audio controls className="w-full">
-                <source src={currentPodcast.audioUrl} type="audio/mpeg" />
+                <source src={currentPodcast.audioUrl} type="audio/wav" />
                 Your browser does not support the audio element.
               </audio>
             </div>

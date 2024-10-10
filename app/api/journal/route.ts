@@ -21,6 +21,7 @@ async function connectToDatabase() {
     const client = new MongoClient(process.env.MONGODB_URI, {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 30000,
+      ssl: true,
     });
     
     console.log('Connecting to MongoDB...');
@@ -81,74 +82,51 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    console.log('Received POST request to /api/journal')
-    
-    let formData;
-    try {
-      formData = await request.formData()
-      console.log('FormData parsed successfully')
-    } catch (formDataError) {
-      console.error('Error parsing FormData:', formDataError)
-      return NextResponse.json({ error: 'Failed to parse form data', details: formDataError instanceof Error ? formDataError.message : 'Unknown error' }, { status: 400 })
+    console.log('POST request received');
+    const { db } = await connectToDatabase();
+    console.log('Connected to database');
+    const collection = db.collection('entries');
+
+    const formData = await request.formData();
+    const formDataObject: Record<string, string> = {};
+    formData.forEach((value, key) => {
+      formDataObject[key] = value.toString();
+    });
+    console.log('Form data:', formDataObject);
+
+    // Validate required fields
+    if (!formDataObject.name || !formDataObject.date || !formDataObject.comment) {
+      console.error('Missing required fields');
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
-    
+
     const entry = {
-      name: formData.get('name'),
-      date: new Date(formData.get('date') as string),
-      comment: formData.get('comment'),
-      photo: null as string | null,
-    }
+      name: formDataObject.name,
+      date: new Date(formDataObject.date), // Convert to Date object
+      comment: formDataObject.comment,
+      createdAt: new Date(), // Add a timestamp
+    };
 
-    // Handle photo upload
-    const photoFile = formData.get('photo') as File | null
-    if (photoFile) {
-      const photoBuffer = await photoFile.arrayBuffer()
-      const photoBase64 = Buffer.from(photoBuffer).toString('base64')
-      entry.photo = `data:${photoFile.type};base64,${photoBase64}`
-    }
+    console.log('Inserting entry:', entry);
+    const result = await collection.insertOne(entry);
+    console.log('Entry inserted, ID:', result.insertedId);
 
-    console.log('Journal entry to be stored:', { ...entry, photo: entry.photo ? 'Photo data present' : 'No photo' })
-
-    console.log('Connecting to database...')
-    let db;
-    try {
-      const connection = await connectToDatabase()
-      db = connection.db
-      console.log('Connected to database successfully')
-    } catch (dbError) {
-      console.error('Database connection error:', dbError)
-      return NextResponse.json({ error: 'Database connection failed', details: dbError instanceof Error ? dbError.message : 'Unknown error' }, { status: 500 })
-    }
-
-    const collection = db.collection('entries')
-
-    console.log('Inserting entry into MongoDB...')
-    let result;
-    try {
-      result = await collection.insertOne(entry)
-      console.log('Entry inserted successfully, ID:', result.insertedId)
-    } catch (insertError) {
-      console.error('Error inserting entry:', insertError)
-      return NextResponse.json({ error: 'Failed to insert entry into database', details: insertError instanceof Error ? insertError.message : 'Unknown error' }, { status: 500 })
-    }
-
-    return NextResponse.json({ success: true, id: result.insertedId })
+    return NextResponse.json({ id: result.insertedId, message: 'Entry submitted successfully' }, { status: 201 });
   } catch (error) {
-    console.error('Error in POST /api/journal:', error)
-    let errorDetails = 'Unknown error'
-    let errorStack = ''
-    if (error instanceof Error) {
-      errorDetails = error.message
-      errorStack = error.stack || ''
-      console.error('Error name:', error.name)
-      console.error('Error message:', error.message)
-      console.error('Error stack:', error.stack)
+    console.error('Error in POST /api/journal:', error);
+    
+    if (error instanceof MongoServerError) {
+      console.error('MongoDB Server Error:', error.code, error.message);
+      return NextResponse.json({ error: 'Database error', details: error.message }, { status: 500 });
+    } else if (error instanceof MongoNetworkError) {
+      console.error('MongoDB Network Error:', error.message);
+      return NextResponse.json({ error: 'Database connection error', details: error.message }, { status: 500 });
     }
     return NextResponse.json({ 
       error: 'An unexpected error occurred', 
-      details: errorDetails,
-      stack: errorStack
-    }, { status: 500 })
+      details: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    }, { status: 500 });
   }
 }
 

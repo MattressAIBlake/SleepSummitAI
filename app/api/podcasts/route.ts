@@ -3,13 +3,8 @@ import { NextResponse } from 'next/server';
 const podcasts = [
   {
     id: '1',
-    title: 'The Future of Sleep Technology',
-    audioUrl: '/audio/future-of-sleep-tech.mp3',
-  },
-  {
-    id: '2',
-    title: 'Understanding Sleep Cycles',
-    audioUrl: '/audio/understanding-sleep-cycles.mp3',
+    title: 'Sleep Summit 2024 AI Podcast Day 1',
+    audioUrl: '/audio/SleepSummitDay1.wav',
   },
   // Add more podcast entries as needed
 ];

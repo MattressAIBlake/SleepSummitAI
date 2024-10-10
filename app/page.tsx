@@ -11,9 +11,10 @@ export default function Home() {
         <div className="hero-image mb-10 max-w-md mx-auto">
           <Image
             src="/images/back-to-future-sleep.jpg"
-            alt="Back to the Future of Sleep"
-            width={1200}
-            height={600}
+            alt="Back to the Future Sleep"
+            width={500}
+            height={300}
+            style={{ objectFit: 'cover' }} // Use this instead of objectFit prop
             className="rounded-lg w-full h-auto"
           />
         </div>

@@ -25,6 +25,9 @@ export default function JournalPage() {
     if (photo) formData.append('photo', photo);
 
     try {
+      const formDataObj = {} as Record<string, string>;
+      formData.forEach((value, key) => formDataObj[key] = value.toString());
+      console.log('Submitting form data:', formDataObj);
       const response = await fetch('/api/journal', {
         method: 'POST',
         body: formData,
@@ -32,7 +35,7 @@ export default function JournalPage() {
 
       if (response.ok) {
         const result = await response.json();
-        setSuccess(`Entry submitted successfully. ID: ${result.id}`);
+        setSuccess(`${result.message} ID: ${result.id}`);
         // Clear form
         setName('');
         setDate('');
