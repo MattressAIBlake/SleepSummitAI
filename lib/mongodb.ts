@@ -18,7 +18,7 @@ let clientPromise: Promise<MongoClient>;
 
 // Define a type for the global object with our custom property
 declare global {
-  var _mongoClientPromise: Promise<MongoClient> | undefined;
+  let _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
 if (process.env.NODE_ENV === 'development') {
@@ -55,21 +55,4 @@ export async function testConnection() {
   }
 }
 
-export async function connectToDatabase() {
-  if (cachedClient) {
-    return { client: cachedClient, db: cachedDb };
-  }
-
-  if (!global._mongoClientPromise) {
-    const client = new MongoClient(MONGODB_URI, options);
-    global._mongoClientPromise = client.connect();
-  }
-
-  const client = await global._mongoClientPromise;
-  const db = client.db(MONGODB_DB);
-
-  cachedClient = client;
-  cachedDb = db;
-
-  return { client, db };
-}
+// Remove the connectToDatabase function as it's using undefined variables
