@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Toaster, toast } from 'react-hot-toast'
+import { MongoClient, ServerApiVersion } from 'mongodb';
 
 export default function JournalPage() {
   const [name, setName] = useState('')
@@ -66,6 +67,25 @@ export default function JournalPage() {
       toast.error(error instanceof Error ? error.message : 'An unexpected error occurred')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  async function getJournalEntries() {
+    try {
+      const client = new MongoClient(process.env.MONGODB_URI!, {
+        serverApi: {
+          version: ServerApiVersion.v1,
+          strict: true,
+          deprecationErrors: true,
+        },
+        ssl: process.env.MONGODB_SSL === 'true',
+        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 10000,
+      });
+
+      // Rest of the function remains the same...
+    } catch (error) {
+      // Error handling...
     }
   }
 
