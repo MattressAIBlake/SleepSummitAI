@@ -18,11 +18,9 @@ async function connectToDatabase() {
 
   try {
     console.log('Attempting to connect to MongoDB...');
-    console.log('MongoDB URI:', process.env.MONGODB_URI.replace(/:[^:@]+@/, ':****@'));
     const client = new MongoClient(process.env.MONGODB_URI, {
       serverSelectionTimeoutMS: 5000,
-      connectTimeoutMS: 10000,
-      ssl: true,
+      socketTimeoutMS: 30000,
     });
     
     console.log('Connecting to MongoDB...');
@@ -40,11 +38,9 @@ async function connectToDatabase() {
   } catch (error) {
     console.error('Failed to connect to MongoDB:', error)
     if (error instanceof MongoServerError) {
-      console.error('MongoDB Server Error:', error.code, error.message, error);
+      console.error('MongoDB Server Error:', error.code, error.message);
     } else if (error instanceof MongoNetworkError) {
-      console.error('MongoDB Network Error:', error.message, error);
-    } else if (error instanceof Error) {
-      console.error('Unexpected error:', error.message, error);
+      console.error('MongoDB Network Error:', error.message);
     }
     throw error; // Re-throw the error after logging
   }
