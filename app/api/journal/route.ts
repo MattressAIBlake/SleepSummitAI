@@ -4,6 +4,8 @@ import { MongoClient, Db } from 'mongodb'
 let cachedClient: MongoClient | null = null
 let cachedDb: Db | null = null
 
+console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
+
 async function connectToDatabase() {
   if (cachedClient && cachedDb) {
     console.log('Using cached database connection');
