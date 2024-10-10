@@ -7,8 +7,7 @@ if (!process.env.MONGODB_URI) {
 const uri = process.env.MONGODB_URI;
 const options = {
   tls: true,
-  tlsAllowInvalidCertificates: false,
-  tlsInsecure: false,
+  tlsAllowInvalidCertificates: false, // This replaces sslValidate
   serverSelectionTimeoutMS: 5000, // 5 seconds
   connectTimeoutMS: 10000, // 10 seconds
 };
