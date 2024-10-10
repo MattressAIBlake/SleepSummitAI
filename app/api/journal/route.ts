@@ -18,25 +18,21 @@ async function connectToDatabase() {
 
   try {
     console.log('Attempting to connect to MongoDB...');
-    console.log('MongoDB URI:', process.env.MONGODB_URI.replace(/:[^:@]+@/, ':****@')); // Log the URI with password hidden
+    console.log('MongoDB URI:', process.env.MONGODB_URI.replace(/:[^:@]+@/, ':****@'));
     const client = new MongoClient(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000, // 5 seconds
-      connectTimeoutMS: 10000, // 10 seconds
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 10000,
     });
-    console.log('MongoClient instance created');
     
-    console.log('Attempting to connect...');
     await client.connect()
     console.log('Connected to MongoDB');
     
-    console.log('Attempting to get database...');
-    const db = client.db('journalDB') // Ensure lowercase 'journalDB'
+    const db = client.db('journalDB')
     console.log('Database instance obtained');
 
     cachedClient = client
     cachedDb = db
 
-    console.log('Connected to MongoDB successfully')
     return { client, db }
   } catch (error) {
     console.error('Failed to connect to MongoDB:', error)
@@ -92,7 +88,7 @@ export async function POST(request: Request) {
       console.log('FormData parsed successfully')
     } catch (formDataError) {
       console.error('Error parsing FormData:', formDataError)
-      throw new Error('Failed to parse form data')
+      return NextResponse.json({ error: 'Failed to parse form data', details: formDataError instanceof Error ? formDataError.message : 'Unknown error' }, { status: 400 })
     }
     
     const entry = {
