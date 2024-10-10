@@ -1,45 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import styles from './JournalPage.module.css';
 
-interface JournalEntry {
-  _id: string;
-  name: string;
-  date: string;
-  comment: string;
-  photo?: string;
-}
-
 export default function JournalPage() {
-  const [entries, setEntries] = useState<JournalEntry[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [comment, setComment] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
-
-  useEffect(() => {
-    fetchEntries();
-  }, []);
-
-  async function fetchEntries() {
-    try {
-      const response = await fetch('/api/journal');
-      if (response.ok) {
-        const data = await response.json();
-        setEntries(data);
-      } else {
-        const errorData = await response.json();
-        setError(`Failed to fetch journal entries: ${errorData.error}`);
-      }
-    } catch (err) {
-      setError(`Error fetching entries: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    }
-  }
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
     const formData = new FormData();
     formData.append('name', name);
     formData.append('date', date);
@@ -53,12 +29,13 @@ export default function JournalPage() {
       });
 
       if (response.ok) {
-        // Clear form and refresh entries
+        const result = await response.json();
+        setSuccess(`Entry submitted successfully. ID: ${result.id}`);
+        // Clear form
         setName('');
         setDate('');
         setComment('');
         setPhoto(null);
-        fetchEntries();
       } else {
         const errorData = await response.json();
         setError(`Failed to submit entry: ${errorData.error}`);
@@ -68,18 +45,12 @@ export default function JournalPage() {
     }
   }
 
-  if (error) {
-    return (
-      <div className={styles.error}>
-        <h1>Error</h1>
-        <p>{error}</p>
-      </div>
-    );
-  }
-
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Journal Entries</h1>
+      <h1 className={styles.title}>Submit Journal Entry</h1>
+      
+      {error && <p className={styles.error}>{error}</p>}
+      {success && <p className={styles.success}>{success}</p>}
       
       <form onSubmit={handleSubmit} className={styles.form}>
         <input
@@ -110,23 +81,8 @@ export default function JournalPage() {
           accept="image/*"
           className={styles.fileInput}
         />
-        <button type="submit" className={styles.button}>Add Entry</button>
+        <button type="submit" className={styles.button}>Submit Entry</button>
       </form>
-
-      <div className={styles.entriesContainer}>
-        {entries.length === 0 ? (
-          <p>No entries found or still loading...</p>
-        ) : (
-          entries.map((entry) => (
-            <div key={entry._id} className={styles.entry}>
-              <h2>{entry.name}</h2>
-              <p>{new Date(entry.date).toLocaleString()}</p>
-              <p>{entry.comment}</p>
-              {entry.photo && <img src={entry.photo} alt="Memory" className={styles.entryImage} />}
-            </div>
-          ))
-        )}
-      </div>
     </div>
   );
 }
