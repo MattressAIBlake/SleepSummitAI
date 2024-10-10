@@ -22,11 +22,14 @@ async function connectToDatabase() {
     const client = new MongoClient(process.env.MONGODB_URI, {
       serverSelectionTimeoutMS: 5000,
       connectTimeoutMS: 10000,
+      ssl: true,
     });
     
+    console.log('Connecting to MongoDB...');
     await client.connect()
     console.log('Connected to MongoDB');
     
+    console.log('Getting database instance...');
     const db = client.db('journalDB')
     console.log('Database instance obtained');
 
