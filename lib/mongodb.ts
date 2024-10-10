@@ -18,7 +18,7 @@ let clientPromise: Promise<MongoClient>;
 
 // Define a type for the global object with our custom property
 declare global {
-  let _mongoClientPromise: Promise<MongoClient> | undefined;
+  var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
 if (process.env.NODE_ENV === 'development') {
