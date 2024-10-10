@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 interface Podcast {
   id: string;
@@ -9,27 +9,11 @@ interface Podcast {
 }
 
 const PodcastPlayer: React.FC = () => {
-  const [podcasts, setPodcasts] = useState<Podcast[]>([]);
+  const [podcasts] = useState<Podcast[]>([
+    { id: '1', title: 'Sleep Summit 2024 AI Podcast Day 1', audioUrl: '/path/to/audio1.wav' },
+    { id: '2', title: 'Sleep Summit 2024 AI Podcast Day 2', audioUrl: '/path/to/audio2.wav' },
+  ]);
   const [currentPodcast, setCurrentPodcast] = useState<Podcast | null>(null);
-
-  useEffect(() => {
-    // Fetch podcasts from the server
-    const fetchPodcasts = async () => {
-      try {
-        const response = await fetch('/api/podcasts');
-        if (response.ok) {
-          const data = await response.json();
-          setPodcasts(data);
-        } else {
-          console.error('Failed to fetch podcasts');
-        }
-      } catch (error) {
-        console.error('Error fetching podcasts:', error);
-      }
-    };
-
-    fetchPodcasts();
-  }, []);
 
   const handlePodcastSelect = (podcast: Podcast) => {
     setCurrentPodcast(podcast);
