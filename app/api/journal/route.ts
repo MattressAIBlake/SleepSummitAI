@@ -23,10 +23,8 @@ async function connectToDatabase() {
       serverSelectionTimeoutMS: 5000,
       connectTimeoutMS: 10000,
       ssl: true,
-      sslValidate: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      tlsAllowInvalidCertificates: true, // Only use this for testing!
+      // Note: useNewUrlParser and useUnifiedTopology are deprecated and no longer needed
+      // tlsAllowInvalidCertificates has been removed for security in production
     });
     
     console.log('Connecting to MongoDB...');
