@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, MongoServerError, MongoNetworkError } from 'mongodb';
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
@@ -6,19 +6,27 @@ if (!process.env.MONGODB_URI) {
 
 const uri = process.env.MONGODB_URI;
 const options = {
-  ssl: true,
-  tlsAllowInvalidCertificates: true, // Only for development/testing
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  tlsInsecure: false,
+  serverSelectionTimeoutMS: 5000, // 5 seconds
+  connectTimeoutMS: 10000, // 10 seconds
 };
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
+// Define a type for the global object with our custom property
+declare global {
+  var _mongoClientPromise: Promise<MongoClient> | undefined;
+}
+
 if (process.env.NODE_ENV === 'development') {
-  if (!(global as any)._mongoClientPromise) {
+  if (!global._mongoClientPromise) {
     client = new MongoClient(uri, options);
-    (global as any)._mongoClientPromise = client.connect();
+    global._mongoClientPromise = client.connect();
   }
-  clientPromise = (global as any)._mongoClientPromise;
+  clientPromise = global._mongoClientPromise;
 } else {
   client = new MongoClient(uri, options);
   clientPromise = client.connect();
@@ -33,14 +41,15 @@ export async function testConnection() {
     console.log('Attempting to connect to MongoDB...');
     const client = await clientPromise;
     console.log('Connected to MongoDB. Pinging database...');
-    await client.db().command({ ping: 1 });
+    await client.db('journalDB').command({ ping: 1 }); // Ensure lowercase 'journalDB'
     console.log("MongoDB connection test successful");
   } catch (error) {
-    console.error("MongoDB connection test failed:", error);
-    if (error instanceof Error) {
-      console.error('Error name:', error.name);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
+    if (error instanceof MongoServerError) {
+      console.error('MongoDB Server Error:', error.code, error.message);
+    } else if (error instanceof MongoNetworkError) {
+      console.error('MongoDB Network Error:', error.message);
+    } else {
+      console.error('Unknown MongoDB Error:', error);
     }
     throw error;
   }

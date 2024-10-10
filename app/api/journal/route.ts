@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { MongoClient } from 'mongodb'
+import { MongoClient, Db } from 'mongodb'
 
 let cachedClient: MongoClient | null = null
-let cachedDb: any = null
+let cachedDb: Db | null = null
 
 async function connectToDatabase() {
   if (cachedClient && cachedDb) {
+    console.log('Using cached database connection');
     return { client: cachedClient, db: cachedDb }
   }
 
@@ -16,15 +17,15 @@ async function connectToDatabase() {
   try {
     console.log('Attempting to connect to MongoDB...');
     console.log('MongoDB URI:', process.env.MONGODB_URI.replace(/:[^:@]+@/, ':****@')); // Log the URI with password hidden
-    const client = new MongoClient(process.env.MONGODB_URI, {
-      // Remove the ssl option
-      connectTimeoutMS: 10000, // 10 seconds
-      socketTimeoutMS: 45000, // 45 seconds
-    })
+    const client = new MongoClient(process.env.MONGODB_URI);
     console.log('MongoClient instance created');
+    
+    console.log('Attempting to connect...');
     await client.connect()
     console.log('Connected to MongoDB');
-    const db = client.db()
+    
+    console.log('Attempting to get database...');
+    const db = client.db('journalDB') // Ensure lowercase 'journalDB'
     console.log('Database instance obtained');
 
     cachedClient = client
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
     const { db } = await connectToDatabase()
     console.log('Connected to database successfully')
 
-    const collection = db.collection('journal_entries')
+    const collection = db.collection('entries') // Use the correct collection name
 
     console.log('Fetching entries...')
     const entries = await collection
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Database connection failed', details: dbError instanceof Error ? dbError.message : 'Unknown error' }, { status: 500 })
     }
 
-    const collection = db.collection('journal_entries')
+    const collection = db.collection('entries') // Use the correct collection name
 
     console.log('Inserting entry into MongoDB...')
     let result;

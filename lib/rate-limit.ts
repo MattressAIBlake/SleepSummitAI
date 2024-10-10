@@ -24,7 +24,8 @@ export const rateLimit = (options?: Options) => {
         const isRateLimited = currentUsage >= limit
         tokenCache.set(token, tokenCount)
 
-        isRateLimited ? reject() : resolve()
+        // Fix: Return the result of the ternary operator
+        return isRateLimited ? reject() : resolve()
       }),
   }
 }
