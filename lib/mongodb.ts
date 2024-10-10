@@ -18,6 +18,7 @@ let clientPromise: Promise<MongoClient>;
 
 // Define a type for the global object with our custom property
 declare global {
+  // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
