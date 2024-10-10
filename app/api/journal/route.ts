@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { MongoClient, Db } from 'mongodb'
+import { MongoClient, Db, MongoServerError, MongoNetworkError } from 'mongodb'
 
 let cachedClient: MongoClient | null = null
 let cachedDb: Db | null = null
@@ -23,8 +23,6 @@ async function connectToDatabase() {
       serverSelectionTimeoutMS: 5000,
       connectTimeoutMS: 10000,
       ssl: true,
-      // Note: useNewUrlParser and useUnifiedTopology are deprecated and no longer needed
-      // tlsAllowInvalidCertificates has been removed for security in production
     });
     
     console.log('Connecting to MongoDB...');
@@ -41,12 +39,14 @@ async function connectToDatabase() {
     return { client, db }
   } catch (error) {
     console.error('Failed to connect to MongoDB:', error)
-    if (error instanceof Error) {
-      console.error('Error name:', error.name)
-      console.error('Error message:', error.message)
-      console.error('Error stack:', error.stack)
+    if (error instanceof MongoServerError) {
+      console.error('MongoDB Server Error:', error.code, error.message, error);
+    } else if (error instanceof MongoNetworkError) {
+      console.error('MongoDB Network Error:', error.message, error);
+    } else if (error instanceof Error) {
+      console.error('Unexpected error:', error.message, error);
     }
-    throw error
+    throw error; // Re-throw the error after logging
   }
 }
 
