@@ -39,7 +39,7 @@ export default function JournalPage() {
         formData.append('photo', photo)
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/journal`, {
+      const response = await fetch('/api/journal', {
         method: 'POST',
         body: formData,
       })
