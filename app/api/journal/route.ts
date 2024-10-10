@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       name: formData.get('name'),
       date: new Date(formData.get('date') as string),
       comment: formData.get('comment'),
-      photo: null as string | null, // Initialize photo as null
+      photo: null as string | null,
     }
 
     // Handle photo upload
@@ -124,7 +124,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Database connection failed', details: dbError instanceof Error ? dbError.message : 'Unknown error' }, { status: 500 })
     }
 
-    const collection = db.collection('entries') // Use the correct collection name
+    const collection = db.collection('entries')
 
     console.log('Inserting entry into MongoDB...')
     let result;
@@ -148,7 +148,6 @@ export async function POST(request: Request) {
       console.error('Error message:', error.message)
       console.error('Error stack:', error.stack)
     }
-    // Return more detailed error information
     return NextResponse.json({ 
       error: 'An unexpected error occurred', 
       details: errorDetails,
