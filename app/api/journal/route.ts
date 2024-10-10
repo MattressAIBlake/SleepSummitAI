@@ -17,7 +17,10 @@ async function connectToDatabase() {
   try {
     console.log('Attempting to connect to MongoDB...');
     console.log('MongoDB URI:', process.env.MONGODB_URI.replace(/:[^:@]+@/, ':****@')); // Log the URI with password hidden
-    const client = new MongoClient(process.env.MONGODB_URI);
+    const client = new MongoClient(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000, // 5 seconds
+      connectTimeoutMS: 10000, // 10 seconds
+    });
     console.log('MongoClient instance created');
     
     console.log('Attempting to connect...');
@@ -73,7 +76,7 @@ export async function GET(request: Request) {
       console.error('Error message:', error.message)
       console.error('Error stack:', error.stack)
     }
-    return NextResponse.json({ error: 'Internal Server Error', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 })
+    return NextResponse.json({ error: 'An unexpected error occurred', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 })
   }
 }
 
@@ -144,7 +147,7 @@ export async function POST(request: Request) {
     }
     // Return more detailed error information
     return NextResponse.json({ 
-      error: 'Internal Server Error', 
+      error: 'An unexpected error occurred', 
       details: errorDetails,
       stack: errorStack
     }, { status: 500 })
