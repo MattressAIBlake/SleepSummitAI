@@ -14,11 +14,7 @@ interface PodcastPlayerProps {
 }
 
 const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ episode }) => {
-  const [podcasts] = useState<Podcast[]>([
-    { id: '1', title: 'Sleep Summit 2024 AI Podcast Day 1', audioUrl: '/path/to/audio1.wav' },
-    { id: '2', title: 'Sleep Summit 2024 AI Podcast Day 2', audioUrl: '/path/to/audio2.wav' },
-  ]);
-  const [currentPodcast, setCurrentPodcast] = useState<Podcast | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -26,38 +22,43 @@ const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ episode }) => {
     console.log('Audio URL:', episode.audioUrl);
   }, [episode]);
 
-  const handlePlay = () => {
-    // Add your play logic here
-  };
-
-  const handlePause = () => {
-    // Add your pause logic here
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
   };
 
   const handleTimeUpdate = () => {
-    // Add your time update logic here
+    // Add your time update logic here if needed
   };
 
   const handleLoadedMetadata = () => {
-    // Add your loaded metadata logic here
-  };
-
-  const handlePodcastSelect = (podcast: Podcast) => {
-    setCurrentPodcast(podcast);
+    // Add your loaded metadata logic here if needed
   };
 
   return (
     <div className={styles.podcastPlayer}>
+      <h2 className={styles.podcastTitle}>{episode.title}</h2>
       <audio
         ref={audioRef}
         src={episode.audioUrl}
-        onPlay={handlePlay}
-        onPause={handlePause}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onError={(e) => console.error('Audio error:', e)}
       />
-      // ... rest of the component
+      <div className={styles.audioControls}>
+        <button className={styles.playPauseButton} onClick={togglePlayPause}>
+          {isPlaying ? 'Pause' : 'Play'}
+        </button>
+        {/* Add more controls here if needed */}
+      </div>
     </div>
   );
 };
