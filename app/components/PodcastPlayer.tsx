@@ -10,17 +10,21 @@ interface Podcast {
 }
 
 interface PodcastPlayerProps {
-  episode: Podcast;
+  episodes: Podcast[];
 }
 
-const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ episode }) => {
+const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ episodes }) => {
+  const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  const currentEpisode = episodes && episodes.length > 0 ? episodes[currentEpisodeIndex] : null;
+
   useEffect(() => {
-    console.log('Episode data:', episode);
-    console.log('Audio URL:', episode.audioUrl);
-  }, [episode]);
+    if (currentEpisode) {
+      console.log('Current episode:', currentEpisode);
+    }
+  }, [currentEpisode]);
 
   const togglePlayPause = () => {
     if (audioRef.current) {
@@ -41,12 +45,21 @@ const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ episode }) => {
     // Add your loaded metadata logic here if needed
   };
 
+  const changeEpisode = (index: number) => {
+    setCurrentEpisodeIndex(index);
+    setIsPlaying(false);
+  };
+
+  if (!episodes || episodes.length === 0) {
+    return <div className={styles.podcastPlayer}>No episodes available</div>;
+  }
+
   return (
     <div className={styles.podcastPlayer}>
-      <h2 className={styles.podcastTitle}>{episode.title}</h2>
+      <h2 className={styles.podcastTitle}>{currentEpisode?.title}</h2>
       <audio
         ref={audioRef}
-        src={episode.audioUrl}
+        src={currentEpisode?.audioUrl}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onTimeUpdate={handleTimeUpdate}
@@ -57,7 +70,15 @@ const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ episode }) => {
         <button className={styles.playPauseButton} onClick={togglePlayPause}>
           {isPlaying ? 'Pause' : 'Play'}
         </button>
-        {/* Add more controls here if needed */}
+        {episodes.map((episode, index) => (
+          <button
+            key={episode.id}
+            onClick={() => changeEpisode(index)}
+            className={`${styles.episodeButton} ${index === currentEpisodeIndex ? styles.active : ''}`}
+          >
+            {episode.title}
+          </button>
+        ))}
       </div>
     </div>
   );
