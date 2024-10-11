@@ -8,15 +8,14 @@ const PodcastPlayer = dynamic(() => import('./components/PodcastPlayer'), { ssr:
 const episodes = [
   {
     id: '1',
-    title: 'Episode 1',
-    audioUrl: '/path/to/episode1.mp3',
+    title: 'Sleep Summit Day 1',
+    audioUrl: '/audio/SleepSummitDay1.wav',
   },
   {
     id: '2',
-    title: 'Episode 2',
-    audioUrl: '/path/to/episode2.mp3',
+    title: 'Sleep Summit Day 2',
+    audioUrl: '/audio/SleepSummitDay2.wav',
   },
-  // Add more episodes as needed
 ];
 
 export default function Home() {

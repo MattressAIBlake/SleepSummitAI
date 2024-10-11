@@ -48,6 +48,16 @@ const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ episodes }) => {
     setIsLoaded(false);
   };
 
+  const handleError = (e: React.SyntheticEvent<HTMLAudioElement, Event>) => {
+    const target = e.target as HTMLAudioElement;
+    console.error('Audio error:', {
+      error: target.error,
+      src: target.src,
+      readyState: target.readyState,
+      networkState: target.networkState,
+    });
+  };
+
   if (!episodes || episodes.length === 0) {
     return <div className={styles.podcastPlayer}>No episodes available</div>;
   }
@@ -62,7 +72,7 @@ const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ episodes }) => {
           onPlay={handlePlay}
           onPause={handlePause}
           onLoadedMetadata={handleLoadedMetadata}
-          onError={(e) => console.error('Audio error:', e)}
+          onError={handleError}
         />
       )}
       <div className={styles.audioControls}>
