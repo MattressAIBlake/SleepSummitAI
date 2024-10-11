@@ -4,6 +4,21 @@ import dynamic from 'next/dynamic';
 
 const PodcastPlayer = dynamic(() => import('./components/PodcastPlayer'), { ssr: false });
 
+// Define your episodes data
+const episodes = [
+  {
+    id: '1',
+    title: 'Episode 1',
+    audioUrl: '/path/to/episode1.mp3',
+  },
+  {
+    id: '2',
+    title: 'Episode 2',
+    audioUrl: '/path/to/episode2.mp3',
+  },
+  // Add more episodes as needed
+];
+
 export default function Home() {
   return (
     <div className="flex flex-col justify-center items-center min-h-screen p-5">
@@ -51,7 +66,7 @@ export default function Home() {
           <p className="text-xl text-yellow-400">REWIND TO WHAT WORKS AND REIMAGINE THE FUTURE</p>
         </div>
       </div>
-      <PodcastPlayer />
+      <PodcastPlayer episodes={episodes} />
     </div>
   );
 }
