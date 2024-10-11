@@ -16,13 +16,15 @@ interface PodcastPlayerProps {
 const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ episodes }) => {
   const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const currentEpisode = episodes && episodes.length > 0 ? episodes[currentEpisodeIndex] : null;
 
   useEffect(() => {
     if (currentEpisode) {
-      console.log('Current episode:', currentEpisode);
+      setIsLoaded(false);
+      setIsPlaying(false);
     }
   }, [currentEpisode]);
 
@@ -30,24 +32,20 @@ const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ episodes }) => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
-      } else {
-        audioRef.current.play();
+      } else if (isLoaded) {
+        audioRef.current.play().catch(e => console.error('Play failed:', e));
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
-  const handleTimeUpdate = () => {
-    // Add your time update logic here if needed
-  };
-
-  const handleLoadedMetadata = () => {
-    // Add your loaded metadata logic here if needed
-  };
+  const handlePlay = () => setIsPlaying(true);
+  const handlePause = () => setIsPlaying(false);
+  const handleLoadedMetadata = () => setIsLoaded(true);
 
   const changeEpisode = (index: number) => {
     setCurrentEpisodeIndex(index);
     setIsPlaying(false);
+    setIsLoaded(false);
   };
 
   if (!episodes || episodes.length === 0) {
@@ -57,17 +55,22 @@ const PodcastPlayer: React.FC<PodcastPlayerProps> = ({ episodes }) => {
   return (
     <div className={styles.podcastPlayer}>
       <h2 className={styles.podcastTitle}>{currentEpisode?.title}</h2>
-      <audio
-        ref={audioRef}
-        src={currentEpisode?.audioUrl}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-        onError={(e) => console.error('Audio error:', e)}
-      />
+      {currentEpisode && (
+        <audio
+          ref={audioRef}
+          src={currentEpisode.audioUrl}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          onLoadedMetadata={handleLoadedMetadata}
+          onError={(e) => console.error('Audio error:', e)}
+        />
+      )}
       <div className={styles.audioControls}>
-        <button className={styles.playPauseButton} onClick={togglePlayPause}>
+        <button 
+          className={styles.playPauseButton} 
+          onClick={togglePlayPause}
+          disabled={!isLoaded}
+        >
           {isPlaying ? 'Pause' : 'Play'}
         </button>
         {episodes.map((episode, index) => (
